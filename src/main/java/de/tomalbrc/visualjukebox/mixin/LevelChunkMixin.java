@@ -14,7 +14,7 @@ public abstract class LevelChunkMixin {
             method = "setBlockEntity",
             at = @At("TAIL")
     )
-    private void filament$filamentDecorationInit(BlockEntity blockEntity, CallbackInfo ci) {
+    private void visualjukebox$onSetBlockEntity(BlockEntity blockEntity, CallbackInfo ci) {
         if (blockEntity instanceof BlockEntityWithElementHolder decorationBlockEntity)
             decorationBlockEntity.visualJukebox$attach(LevelChunk.class.cast(this));
     }
