@@ -4,7 +4,8 @@
   "package": "de.tomalbrc.visualjukebox.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-  "JukeBoxMixin"
+    "JukeboxBlockEntityMixin",
+    "LevelChunkMixin"
   ],
   "injectors": {
     "defaultRequire": 1
