@@ -7,7 +7,7 @@
   "authors": ["tomalbrc"],
   "contact": {},
   "license": "LGPL-3.0",
-  "icon": "assets/visualjukebox/icon.png",
+  "icon": "visualjukebox-icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [

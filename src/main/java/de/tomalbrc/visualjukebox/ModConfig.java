@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 public class ModConfig {
-    private final static Path CONFIG_FILE_PATH = FabricLoader.getInstance().getConfigDir().resolve("joincommands" + ".json");
+    private final static Path CONFIG_FILE_PATH = FabricLoader.getInstance().getConfigDir().resolve("visualjukebox" + ".json");
     private final static Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .create();
