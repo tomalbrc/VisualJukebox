@@ -78,6 +78,9 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
                 public void tick() {
                     super.tick();
 
+                    if (visualjukebox$isStatic)
+                        return;
+
                     if (getBlockState().getValue(JukeboxBlock.HAS_RECORD) && visualjukebox$discElement.getItem().isEmpty()) {
                         visualjukebox$discElement.setItem(getTheItem());
                     }
@@ -108,6 +111,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.rotateXYZ(0, Mth.HALF_PI, 0);
             matrix4f.scale(0.65f);
+            matrix4f.translate(-1 / 32.f, 0, 0);
             visualjukebox$discElement.setTransformation(matrix4f);
         }
         else {
@@ -119,10 +123,24 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
-    protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
         if (compoundTag.contains("ticks_since_song_started", 4)) {
             visualjukebox$stopped = false;
             visualjukebox$time = compoundTag.getLong("ticks_since_song_started");
+        } else if (compoundTag.contains("custom_time", 4)) {
+            visualjukebox$stopped = false;
+            visualjukebox$time = compoundTag.getLong("custom_time");
+        }
+    }
+
+    @Inject(method = "saveAdditional", at = @At("TAIL"))
+    protected void visualjukebox$onSaveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+        if (compoundTag.contains("ticks_since_song_started", 4)) {
+            visualjukebox$stopped = false;
+            visualjukebox$time = compoundTag.getLong("ticks_since_song_started");
+        } else if (compoundTag.contains("custom_time", 4)) {
+            visualjukebox$stopped = false;
+            visualjukebox$time = compoundTag.getLong("custom_time");
         }
     }
 

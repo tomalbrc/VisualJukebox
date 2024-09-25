@@ -20,6 +20,8 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
+    "polymer-core": "*",
+    "polymer-virtual-entity": "*",
     "minecraft": ">=${minecraft_version}"
   }
 }

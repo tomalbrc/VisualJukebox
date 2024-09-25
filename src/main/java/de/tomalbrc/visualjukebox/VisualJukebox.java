@@ -8,5 +8,8 @@ public class VisualJukebox implements ModInitializer {
     public void onInitialize() {
         // hi there :)
         // See JukeboxBlockEntity for the sauce
+
+        // force load/create
+        ModConfig.getInstance();
     }
 }
