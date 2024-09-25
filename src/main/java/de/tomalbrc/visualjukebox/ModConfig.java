@@ -21,7 +21,7 @@ public class ModConfig {
     static ModConfig instance;
 
     @SerializedName("static")
-    public boolean staticDiscs = false;
+    public boolean staticDiscs = true;
 
     public static ModConfig getInstance() {
         if (instance == null) {

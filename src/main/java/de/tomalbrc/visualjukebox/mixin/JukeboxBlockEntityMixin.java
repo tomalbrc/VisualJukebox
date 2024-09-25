@@ -2,6 +2,7 @@ package de.tomalbrc.visualjukebox.mixin;
 
 import com.mojang.math.Axis;
 import de.tomalbrc.visualjukebox.BlockEntityWithElementHolder;
+import de.tomalbrc.visualjukebox.JukeboxHolder;
 import de.tomalbrc.visualjukebox.ModConfig;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
@@ -31,19 +32,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     @Shadow public abstract ItemStack getTheItem();
 
     @Unique
-    private ElementHolder visualjukebox$holder;
-
-    @Unique
-    private ItemDisplayElement visualjukebox$discElement;
-
-    @Unique
-    private long visualjukebox$time;
-
-    @Unique
-    private boolean visualjukebox$stopped = true;
-
-    @Unique
-    private final boolean visualjukebox$isStatic = ModConfig.getInstance().staticDiscs;
+    private JukeboxHolder visualjukebox$holder;
 
     public JukeboxBlockEntityMixin(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
@@ -51,104 +40,53 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
 
     @Inject(method = "onSongChanged", at = @At("RETURN"))
     public void visualjukebox$onSongChanged(CallbackInfo ci) {
-        // song stopped
-        this.visualjukebox$stopped = (this.visualjukebox$discElement != null && this.getTheItem() == this.visualjukebox$discElement.getItem()) || this.getTheItem().isEmpty();
+        // song stopped maybe
+        this.visualjukebox$holder.setStopped((this.visualjukebox$holder != null && this.getTheItem() == this.visualjukebox$holder.getItem()) || this.getTheItem().isEmpty());
 
         if (this.visualjukebox$holder == null && this.getLevel() != null) {
-            this.visualjukebox$initHolder(this.getLevel().getChunkAt(this.getBlockPos()));
+            this.visualJukebox$attach(this.getLevel().getChunkAt(this.getBlockPos()));
         }
 
         if (this.visualjukebox$holder != null) {
-            this.visualjukebox$discElement.setItem(this.getTheItem());
+            this.visualjukebox$holder.setItem(this.getTheItem());
         }
     }
 
     @Inject(method = "popOutTheItem", at = @At("RETURN"))
     public void visualjukebox$popOutTheItem(CallbackInfo ci) {
-        this.visualjukebox$discElement.setItem(ItemStack.EMPTY);
-        this.visualjukebox$discElement.setLeftRotation(Axis.YP.rotationDegrees(0));
+        this.visualjukebox$holder.setItem(ItemStack.EMPTY);
     }
 
     @Unique
-    private void visualjukebox$initHolder(LevelChunk levelChunk) {
-        if (levelChunk != null) {
-            this.visualjukebox$discElement = new ItemDisplayElement(this.getTheItem());
-            this.visualjukebox$holder = new ElementHolder() {
-                @Override
-                public void tick() {
-                    super.tick();
-
-                    if (getBlockState().getValue(JukeboxBlock.HAS_RECORD) && visualjukebox$discElement.getItem().isEmpty()) {
-                        visualjukebox$discElement.setItem(getTheItem());
-                    }
-
-                    if (visualjukebox$isStatic) {
-                        return;
-                    }
-
-                    if (!visualjukebox$stopped && !visualjukebox$discElement.getItem().isEmpty() && getLevel().getGameTime()%10==0) {
-                        visualjukebox$discElement.setInterpolationDuration(11);
-                        visualjukebox$updateDisc(visualjukebox$discElement);
-                        visualjukebox$discElement.startInterpolationIfDirty();
-
-                        visualjukebox$time++;
-                    }
-                }
-            };
-            this.visualjukebox$holder.addElement(this.visualjukebox$discElement);
-            new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
-
-            this.visualjukebox$discElement.setInterpolationDuration(0);
-
-            visualjukebox$updateDisc(this.visualjukebox$discElement);
-            this.visualjukebox$discElement.setDisplaySize(1.5f, 1.5f);
-            this.visualjukebox$discElement.setOffset(new Vec3(0,0.5,0)); // AAAH DISCS ARE NOT CENTERED
-        }
-    }
-
-    @Unique
-    private void visualjukebox$updateDisc(ItemDisplayElement element) {
-        if (visualjukebox$isStatic) {
-            Matrix4f matrix4f = new Matrix4f();
-            matrix4f.rotateXYZ(0, Mth.HALF_PI, 0);
-            matrix4f.scale(0.65f);
-            matrix4f.translate(-1 / 32.f, 0, 0);
-            element.setTransformation(matrix4f);
-        }
-        else {
-            Matrix4f matrix4f = new Matrix4f();
-            matrix4f.rotateXYZ(Mth.HALF_PI, 0, Mth.DEG_TO_RAD * ((this.visualjukebox$time * 2.f) % 360));
-            matrix4f.translate(-1 / 32.f, 0, 0);
-            element.setTransformation(matrix4f);
-        }
+    private void visualjukebox$initHolder() {
+        this.visualjukebox$holder = new JukeboxHolder(JukeboxBlockEntity.class.cast(this));
+        this.visualjukebox$holder.setup(this.getTheItem());
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
     protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+        if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
+
         if (compoundTag.contains("ticks_since_song_started", 4)) {
-            visualjukebox$stopped = false;
-            visualjukebox$time = compoundTag.getLong("ticks_since_song_started");
+            this.visualjukebox$holder.setStopped(false);
+            this.visualjukebox$holder.setTime(compoundTag.getLong("ticks_since_song_started"));
         } else if (compoundTag.contains("custom_time", 4)) {
-            visualjukebox$stopped = false;
-            visualjukebox$time = compoundTag.getLong("custom_time");
+            this.visualjukebox$holder.setStopped(false);
+            this.visualjukebox$holder.setTime(compoundTag.getLong("custom_time"));
         }
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
     protected void visualjukebox$onSaveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
-        if (compoundTag.contains("ticks_since_song_started", 4)) {
-            visualjukebox$stopped = false;
-            visualjukebox$time = compoundTag.getLong("ticks_since_song_started");
-        } else if (compoundTag.contains("custom_time", 4)) {
-            visualjukebox$stopped = false;
-            visualjukebox$time = compoundTag.getLong("custom_time");
-        }
+        if (this.visualjukebox$holder.getTime() > 0 && !ModConfig.getInstance().staticDiscs)
+            compoundTag.putLong("custom_time", this.visualjukebox$holder.getTime() % 360);
     }
 
     @Override
     public void visualJukebox$attach(LevelChunk levelChunk) {
-        if (this.hasLevel() && this.visualjukebox$holder == null) {
-            visualjukebox$initHolder(levelChunk);
+        if (this.hasLevel()) {
+            if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
+            var attachment = new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
         }
     }
 }
