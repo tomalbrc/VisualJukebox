@@ -78,11 +78,12 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
                 public void tick() {
                     super.tick();
 
-                    if (visualjukebox$isStatic)
-                        return;
-
                     if (getBlockState().getValue(JukeboxBlock.HAS_RECORD) && visualjukebox$discElement.getItem().isEmpty()) {
                         visualjukebox$discElement.setItem(getTheItem());
+                    }
+
+                    if (visualjukebox$isStatic) {
+                        return;
                     }
 
                     if (!visualjukebox$stopped && !visualjukebox$discElement.getItem().isEmpty() && getLevel().getGameTime()%10==0) {
@@ -95,7 +96,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
                 }
             };
             this.visualjukebox$holder.addElement(this.visualjukebox$discElement);
-            new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), !this.visualjukebox$isStatic);
+            new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
 
             this.visualjukebox$discElement.setInterpolationDuration(0);
 
@@ -106,19 +107,19 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     }
 
     @Unique
-    private void visualjukebox$updateDisc(ItemDisplayElement visualjukebox$discElement) {
+    private void visualjukebox$updateDisc(ItemDisplayElement element) {
         if (visualjukebox$isStatic) {
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.rotateXYZ(0, Mth.HALF_PI, 0);
             matrix4f.scale(0.65f);
             matrix4f.translate(-1 / 32.f, 0, 0);
-            visualjukebox$discElement.setTransformation(matrix4f);
+            element.setTransformation(matrix4f);
         }
         else {
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.rotateXYZ(Mth.HALF_PI, 0, Mth.DEG_TO_RAD * ((this.visualjukebox$time * 2.f) % 360));
             matrix4f.translate(-1 / 32.f, 0, 0);
-            visualjukebox$discElement.setTransformation(matrix4f);
+            element.setTransformation(matrix4f);
         }
     }
 
