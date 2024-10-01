@@ -1,25 +1,17 @@
 package de.tomalbrc.visualjukebox.mixin;
 
-import com.mojang.math.Axis;
 import de.tomalbrc.visualjukebox.BlockEntityWithElementHolder;
 import de.tomalbrc.visualjukebox.JukeboxHolder;
 import de.tomalbrc.visualjukebox.ModConfig;
-import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
-import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(JukeboxBlockEntity.class)
 public abstract class JukeboxBlockEntityMixin extends BlockEntity implements BlockEntityWithElementHolder {
-    @Shadow public abstract ItemStack getTheItem();
+
+    @Shadow public abstract ItemStack getItem(int i);
 
     @Unique
     private JukeboxHolder visualjukebox$holder;
@@ -38,21 +31,35 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
         super(blockEntityType, blockPos, blockState);
     }
 
-    @Inject(method = "onSongChanged", at = @At("RETURN"))
-    public void visualjukebox$onSongChanged(CallbackInfo ci) {
+    @Inject(method = "startPlaying", at = @At("RETURN"))
+    public void visualjukebox$onStart(CallbackInfo ci) {
         // song stopped maybe
-        this.visualjukebox$holder.setStopped((this.visualjukebox$holder != null && this.getTheItem() == this.visualjukebox$holder.getItem()) || this.getTheItem().isEmpty());
+        this.visualjukebox$holder.setStopped((this.visualjukebox$holder != null && this.getItem(0) == this.visualjukebox$holder.getItem()) || this.getItem(0).isEmpty());
 
         if (this.visualjukebox$holder == null && this.getLevel() != null) {
             this.visualJukebox$attach(this.getLevel().getChunkAt(this.getBlockPos()));
         }
 
         if (this.visualjukebox$holder != null) {
-            this.visualjukebox$holder.setItem(this.getTheItem());
+            this.visualjukebox$holder.setItem(this.getItem(0));
         }
     }
 
-    @Inject(method = "popOutTheItem", at = @At("RETURN"))
+    @Inject(method = "stopPlaying", at = @At("RETURN"))
+    public void visualjukebox$onStop(CallbackInfo ci) {
+        // song stopped maybe
+        this.visualjukebox$holder.setStopped(true);
+
+        if (this.visualjukebox$holder == null && this.getLevel() != null) {
+            this.visualJukebox$attach(this.getLevel().getChunkAt(this.getBlockPos()));
+        }
+
+        if (this.visualjukebox$holder != null) {
+            this.visualjukebox$holder.setItem(this.getItem(0));
+        }
+    }
+
+    @Inject(method = "popOutRecord", at = @At("RETURN"))
     public void visualjukebox$popOutTheItem(CallbackInfo ci) {
         this.visualjukebox$holder.setItem(ItemStack.EMPTY);
     }
@@ -60,11 +67,11 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     @Unique
     private void visualjukebox$initHolder() {
         this.visualjukebox$holder = new JukeboxHolder(JukeboxBlockEntity.class.cast(this));
-        this.visualjukebox$holder.setup(this.getTheItem());
+        this.visualjukebox$holder.setup(this.getItem(0));
     }
 
-    @Inject(method = "loadAdditional", at = @At("TAIL"))
-    protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    @Inject(method = "load", at = @At("TAIL"))
+    protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, CallbackInfo ci) {
         if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
 
         if (compoundTag.contains("ticks_since_song_started", 4)) {
@@ -77,7 +84,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
-    protected void visualjukebox$onSaveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    protected void visualjukebox$onSaveAdditional(CompoundTag compoundTag, CallbackInfo ci) {
         if (this.visualjukebox$holder.getTime() > 0 && !ModConfig.getInstance().staticDiscs)
             compoundTag.putLong("custom_time", this.visualjukebox$holder.getTime() % 360);
     }

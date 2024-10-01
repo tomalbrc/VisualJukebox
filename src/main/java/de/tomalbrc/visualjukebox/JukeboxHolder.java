@@ -76,13 +76,13 @@ public class JukeboxHolder extends ElementHolder {
         super.tick();
 
         if (this.jukeboxBlockEntity.getBlockState().getValue(JukeboxBlock.HAS_RECORD) && this.discElement.getItem().isEmpty()) {
-            this.discElement.setItem(this.jukeboxBlockEntity.getTheItem());
+            this.discElement.setItem(this.jukeboxBlockEntity.getFirstItem());
         }
 
         if (this.jukeboxBlockEntity.getLevel() != null && this.jukeboxBlockEntity.getLevel().getGameTime()%10==0) {
-            this.discElement.setInterpolationDuration(this.jukeboxBlockEntity.getTheItem().isEmpty() ? 0 : 11);
+            this.discElement.setInterpolationDuration(this.jukeboxBlockEntity.getFirstItem().isEmpty() ? 0 : 11);
             this.updateDisc();
-            this.discElement.startInterpolationIfDirty();
+            if (this.discElement.isDirty()) this.discElement.startInterpolation();
 
             if (!this.stopped) this.time++;
         }
