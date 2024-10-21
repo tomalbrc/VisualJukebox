@@ -13,6 +13,7 @@ base {
 
 repositories {
     maven { url 'https://maven.nucleoid.xyz' }
+    mavenLocal()
 }
 
 dependencies {

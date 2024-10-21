@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.spongepowered.asm.mixin.Unique;
 
 public class JukeboxHolder extends ElementHolder {
     private ItemDisplayElement discElement;
@@ -46,12 +45,6 @@ public class JukeboxHolder extends ElementHolder {
             this.discElement.setItem(itemStack);
     }
 
-    public ItemStack getItem() {
-        if (this.discElement != null)
-            return this.discElement.getItem();
-        return ItemStack.EMPTY;
-    }
-
     private void updateDisc() {
         if (ModConfig.getInstance().staticDiscs) {
             Matrix4f matrix4f = new Matrix4f();
@@ -84,7 +77,7 @@ public class JukeboxHolder extends ElementHolder {
             this.updateDisc();
             this.discElement.startInterpolationIfDirty();
 
-            if (!this.stopped) this.time++;
+            if (this.jukeboxBlockEntity.getSongPlayer().isPlaying()) this.time++;
         }
     }
 

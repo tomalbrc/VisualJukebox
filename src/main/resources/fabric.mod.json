@@ -22,6 +22,6 @@
     "fabric": "*",
     "polymer-core": "*",
     "polymer-virtual-entity": "*",
-    "minecraft": ">=${minecraft_version}"
+    "minecraft": ">=1.21.2-"
   }
 }
