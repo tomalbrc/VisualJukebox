@@ -60,14 +60,12 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
         if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
 
         if (compoundTag.contains("ticks_since_song_started", 4)) {
-            this.visualjukebox$holder.setStopped(false);
             this.visualjukebox$holder.setTime(compoundTag.getLong("ticks_since_song_started"));
-        } else if (compoundTag.contains("custom_time", 4)) {
             this.visualjukebox$holder.setStopped(false);
+        } else if (compoundTag.contains("custom_time", 4)) {
             this.visualjukebox$holder.setTime(compoundTag.getLong("custom_time"));
+            this.visualjukebox$holder.setStopped(false);
         }
-
-        this.visualjukebox$holder.setup(this.getTheItem());
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))

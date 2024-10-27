@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class JukeboxHolder extends ElementHolder {
-    private ItemDisplayElement discElement;
+    private final ItemDisplayElement discElement;
     private long time;
 
     private final JukeboxBlockEntity jukeboxBlockEntity;
@@ -19,25 +19,21 @@ public class JukeboxHolder extends ElementHolder {
 
     public JukeboxHolder(JukeboxBlockEntity blockEntity) {
         this.jukeboxBlockEntity = blockEntity;
+
+        this.discElement = new ItemDisplayElement();
+        this.discElement.setDisplaySize(1.5f, 1.5f);
+        this.discElement.setOffset(new Vec3(0,0.5,0));
+
+        this.addElement(this.discElement);
     }
 
     public void setStopped(boolean stopped) {
         this.stopped = stopped;
+        this.updateDisc();
     }
 
     public void setTime(long time) {
         this.time = time;
-    }
-
-    public void setup(ItemStack itemStack) {
-        this.discElement = new ItemDisplayElement(itemStack);
-        this.addElement(this.discElement);
-
-        this.discElement.setInterpolationDuration(0);
-
-        this.updateDisc();
-        this.discElement.setDisplaySize(1.5f, 1.5f);
-        this.discElement.setOffset(new Vec3(0,0.5,0));
     }
 
     public void setItem(ItemStack itemStack) {
@@ -57,25 +53,27 @@ public class JukeboxHolder extends ElementHolder {
         else {
             // cont. rotation
             Matrix4f matrix4f = new Matrix4f();
-            matrix4f.rotateXYZ(Mth.HALF_PI, 0, Mth.DEG_TO_RAD * ((this.time * 2.f) % 360));
+            matrix4f.rotateXYZ(Mth.HALF_PI, 0, Mth.DEG_TO_RAD * ((this.time * 4.f) % 360));
             matrix4f.scale(.9f,1.3f,1.f);
             matrix4f.translate(-1 / 32.f, 0, 0);
             this.discElement.setTransformation(matrix4f);
         }
+        this.discElement.setInterpolationDuration(this.jukeboxBlockEntity.getTheItem().isEmpty() ? 0 : 11);
+        this.discElement.startInterpolationIfDirty();
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (this.jukeboxBlockEntity.getBlockState().getValue(JukeboxBlock.HAS_RECORD) && this.discElement.getItem().isEmpty()) {
-            this.discElement.setItem(this.jukeboxBlockEntity.getTheItem());
-        }
+
 
         if (this.jukeboxBlockEntity.getLevel() != null && this.jukeboxBlockEntity.getLevel().getGameTime()%10==0) {
-            this.discElement.setInterpolationDuration(this.jukeboxBlockEntity.getTheItem().isEmpty() ? 0 : 11);
+            if (this.jukeboxBlockEntity.getBlockState().getValue(JukeboxBlock.HAS_RECORD) && this.discElement.getItem().isEmpty()) {
+                this.discElement.setItem(this.jukeboxBlockEntity.getTheItem());
+            }
+
             this.updateDisc();
-            this.discElement.startInterpolationIfDirty();
 
             if (this.jukeboxBlockEntity.getSongPlayer().isPlaying()) this.time++;
         }
