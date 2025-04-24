@@ -59,11 +59,11 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
         if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
 
-        if (compoundTag.contains("ticks_since_song_started", 4)) {
-            this.visualjukebox$holder.setTime(compoundTag.getLong("ticks_since_song_started"));
+        if (compoundTag.contains("ticks_since_song_started")) {
+            this.visualjukebox$holder.setTime(compoundTag.getLong("ticks_since_song_started").orElse(0L));
             this.visualjukebox$holder.setStopped(false);
-        } else if (compoundTag.contains("custom_time", 4)) {
-            this.visualjukebox$holder.setTime(compoundTag.getLong("custom_time"));
+        } else if (compoundTag.contains("custom_time")) {
+            this.visualjukebox$holder.setTime(compoundTag.getLong("custom_time").orElse(0L));
             this.visualjukebox$holder.setStopped(false);
         }
     }
