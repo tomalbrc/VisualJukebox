@@ -38,16 +38,15 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
             this.visualJukebox$attach(this.getLevel().getChunkAt(this.getBlockPos()));
         }
 
-        if (this.visualjukebox$holder != null) this.visualjukebox$holder.setStopped(!JukeboxBlockEntity.class.cast(this).getSongPlayer().isPlaying());
-
         if (this.visualjukebox$holder != null) {
+            this.visualjukebox$holder.setStopped(!JukeboxBlockEntity.class.cast(this).getSongPlayer().isPlaying());
             this.visualjukebox$holder.setItem(this.getTheItem());
         }
     }
 
     @Inject(method = "popOutTheItem", at = @At("RETURN"))
     public void visualjukebox$popOutTheItem(CallbackInfo ci) {
-        this.visualjukebox$holder.setItem(ItemStack.EMPTY);
+        if (this.visualjukebox$holder != null) this.visualjukebox$holder.setItem(ItemStack.EMPTY);
     }
 
     @Unique
@@ -76,9 +75,9 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
 
     @Override
     public void visualJukebox$attach(LevelChunk levelChunk) {
-        if (this.hasLevel()) {
+        if (this.hasLevel() && !level.isClientSide) {
             if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
-            new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
+            if (this.visualjukebox$holder != null) new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
         }
     }
 }
