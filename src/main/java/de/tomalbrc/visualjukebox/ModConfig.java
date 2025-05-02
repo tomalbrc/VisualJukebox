@@ -53,7 +53,7 @@ public class ModConfig {
         return false;
     }
 
-    private static void save() {
+    public static void save() {
         try {
             FileOutputStream stream = new FileOutputStream(CONFIG_FILE_PATH.toFile());
             stream.write(gson.toJson(instance).getBytes(StandardCharsets.UTF_8));

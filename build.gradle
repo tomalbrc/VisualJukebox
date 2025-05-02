@@ -13,7 +13,7 @@ base {
 
 repositories {
     maven { url 'https://maven.nucleoid.xyz' }
-    mavenLocal()
+    maven { url "https://maven.terraformersmc.com/" }
 }
 
 dependencies {
@@ -25,6 +25,8 @@ dependencies {
 
     modImplementation ("eu.pb4:polymer-core:${project.polymer_version}")
     modImplementation ("eu.pb4:polymer-virtual-entity:${project.polymer_version}")
+
+    modCompileOnly modRuntimeOnly("com.terraformersmc:modmenu:14.0.0-rc.2")
 }
 
 processResources {

@@ -4,12 +4,17 @@
   "version": "${version}",
   "name": "VisualJukebox",
   "description": "",
-  "authors": ["tomalbrc"],
+  "authors": [
+    "tomalbrc"
+  ],
   "contact": {},
   "license": "LGPL-3.0",
   "icon": "visualjukebox-icon.png",
   "environment": "*",
   "entrypoints": {
+    "modmenu": [
+      "de.tomalbrc.visualjukebox.ModMenuIntegration"
+    ],
     "main": [
       "de.tomalbrc.visualjukebox.VisualJukebox"
     ]
