@@ -5,14 +5,14 @@ import de.tomalbrc.visualjukebox.JukeboxHolder;
 import de.tomalbrc.visualjukebox.ModConfig;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -55,22 +55,24 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
-    protected void visualjukebox$onLoadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    protected void visualjukebox$onLoadAdditional(ValueInput valueInput, CallbackInfo ci) {
         if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
 
-        if (compoundTag.contains("ticks_since_song_started")) {
-            this.visualjukebox$holder.setTime(compoundTag.getLong("ticks_since_song_started").orElse(0L));
+        valueInput.getLong("ticks_since_song_started").ifPresentOrElse(x -> {
+            this.visualjukebox$holder.setTime(x);
             this.visualjukebox$holder.setStopped(false);
-        } else if (compoundTag.contains("custom_time")) {
-            this.visualjukebox$holder.setTime(compoundTag.getLong("custom_time").orElse(0L));
-            this.visualjukebox$holder.setStopped(false);
-        }
+        }, () -> {
+            valueInput.getLong("custom_time").ifPresent(x -> {
+                this.visualjukebox$holder.setTime(x);
+                this.visualjukebox$holder.setStopped(false);
+            });
+        });
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
-    protected void visualjukebox$onSaveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    protected void visualjukebox$onSaveAdditional(ValueOutput valueOutput, CallbackInfo ci) {
         if (this.visualjukebox$holder.getTime() > 0 && !ModConfig.getInstance().staticDiscs)
-            compoundTag.putLong("custom_time", this.visualjukebox$holder.getTime() % 360);
+            valueOutput.putLong("custom_time", this.visualjukebox$holder.getTime() % 360);
     }
 
     @Override

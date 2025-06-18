@@ -17,7 +17,7 @@ public class ModMenuIntegration implements ModMenuApi {
         private final Screen parent;
 
         protected SimpleConfigScreen(Screen parent) {
-            super(Component.literal("My Mod Config"));
+            super(Component.literal("VisualJukebox Config"));
             this.parent = parent;
         }
 
