@@ -21,7 +21,7 @@ public abstract class LevelChunkMixin {
             at = @At("TAIL")
     )
     private void visualjukebox$onSetBlockEntity(BlockEntity blockEntity, CallbackInfo ci) {
-        if (!level.isClientSide && blockEntity instanceof BlockEntityWithElementHolder decorationBlockEntity)
+        if (!level.isClientSide() && blockEntity instanceof BlockEntityWithElementHolder decorationBlockEntity)
             decorationBlockEntity.visualJukebox$attach(LevelChunk.class.cast(this));
     }
 }

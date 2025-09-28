@@ -77,7 +77,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
 
     @Override
     public void visualJukebox$attach(LevelChunk levelChunk) {
-        if (this.hasLevel() && !level.isClientSide) {
+        if (this.hasLevel() && !level.isClientSide()) {
             if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
             if (this.visualjukebox$holder != null) new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
         }
