@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -79,7 +80,7 @@ public abstract class JukeboxBlockEntityMixin extends BlockEntity implements Blo
     public void visualJukebox$attach(LevelChunk levelChunk) {
         if (this.hasLevel() && !level.isClientSide()) {
             if (this.visualjukebox$holder == null) this.visualjukebox$initHolder();
-            if (this.visualjukebox$holder != null) new ChunkAttachment(this.visualjukebox$holder, levelChunk, this.getBlockPos().getCenter(), true);
+            if (this.visualjukebox$holder != null) new ChunkAttachment(this.visualjukebox$holder, levelChunk, Vec3.atCenterOf(this.getBlockPos()), true);
         }
     }
 }

@@ -10,7 +10,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> new SimpleConfigScreen(parent);
+        return SimpleConfigScreen::new;
     }
 
     static class SimpleConfigScreen extends Screen {
@@ -28,7 +28,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
             this.addRenderableWidget(Button.builder(
                     Component.literal("Back"),
-                btn -> this.minecraft.setScreen(parent)
+                btn -> this.minecraft.setScreenAndShow(parent)
             ).bounds(widthCenter - 100, heightCenter + 20, 200, 20).build());
 
             this.addRenderableWidget(Button.builder(
@@ -43,8 +43,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
         @Override
         public void onClose() {
-            assert this.minecraft != null;
-            this.minecraft.setScreen(parent);
+            this.minecraft.setScreenAndShow(parent);
         }
     }
 }
