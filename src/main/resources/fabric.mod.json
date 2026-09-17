@@ -26,6 +26,6 @@
     "fabricloader": ">=${loader_version}",
     "polymer-core": "*",
     "polymer-virtual-entity": "*",
-    "minecraft": ">=26.1"
+    "minecraft": ">=26.2"
   }
 }
